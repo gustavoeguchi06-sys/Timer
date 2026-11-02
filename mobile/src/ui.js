@@ -1,6 +1,7 @@
 // Componentes de interface reutilizáveis (cards, botões, stepper, toggle, chips).
 import { useEffect, useRef } from "react";
-import { Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Animated, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import Pressable from "./Touch";
 import * as Haptics from "expo-haptics";
 import Icon from "./icons";
 import { C, F, R, S, TOUCH, textOn } from "./theme";
@@ -74,16 +75,20 @@ export function IconBtn({ icon, onPress, color = C.text2, style, label }) {
 // Botão que repete enquanto está pressionado (segurar + ou −)
 function RepeatButton({ label, onStep, accessibilityLabel }) {
   const hold = useRef(null);
+  const touched = useRef(false);
   const stop = () => { clearTimeout(hold.current); clearInterval(hold.current); };
   useEffect(() => stop, []);
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel}
       onPressIn={() => {
+        touched.current = true;
         tap(); onStep();
         hold.current = setTimeout(() => { hold.current = setInterval(onStep, 90); }, 420);
       }}
       onPressOut={stop}
+      // botão OK do controle remoto: dispara onPress sem passar por onPressIn
+      onPress={() => { if (!touched.current) onStep(); touched.current = false; }}
       style={({ pressed }) => [st.step, pressed && { backgroundColor: C.cyan400 }]}
     >
       {({ pressed }) => <Text style={[st.stepText, pressed && { color: C.onCyan }]}>{label}</Text>}

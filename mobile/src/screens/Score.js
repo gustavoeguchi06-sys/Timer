@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import Pressable from "../Touch";
 import * as Haptics from "expo-haptics";
 import { C, F, R, S } from "../theme";
 import { Btn, PageHead } from "../ui";

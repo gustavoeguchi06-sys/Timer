@@ -1,4 +1,5 @@
-import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import Pressable from "../Touch";
 import * as ImagePicker from "expo-image-picker";
 import DisplayView from "../DisplayView";
 import Icon from "../icons";

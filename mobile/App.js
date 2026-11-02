@@ -1,9 +1,10 @@
 // CT MAX TIMER — app Android (React Native / Expo). Funciona sozinho, sem servidor.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert, AppState, BackHandler, KeyboardAvoidingView, Modal, Platform, Pressable,
-  ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
+  Alert, AppState, BackHandler, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from "react-native";
+import Pressable from "./src/Touch";
+import { Pressable as RNPressable } from "react-native";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -54,8 +55,10 @@ function Main() {
   const [cfg, setCfg, r5] = usePersisted("cfg", { mode: "round", work: 300, rest: 60, rounds: 5, warn: true });
   const ready = r1 && r2 && r3 && r4 && r5;
 
+  const isTV = Platform.isTV === true;
   const [view, setView] = useState("modes");
-  const [displayOpen, setDisplayOpen] = useState(false);
+  // na TV Box o app abre direto na tela de exibição (o "voltar" do controle leva aos menus)
+  const [displayOpen, setDisplayOpen] = useState(isTV);
   const [scoreFull, setScoreFull] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [nameModal, setNameModal] = useState(null);
@@ -265,7 +268,7 @@ function Main() {
 
       {/* exibição em tela cheia */}
       <Modal visible={displayOpen} animationType="fade" onRequestClose={() => setDisplayOpen(false)} statusBarTranslucent navigationBarTranslucent supportedOrientations={["portrait", "landscape"]}>
-        <DisplayScreen timer={timer} now={now} settings={settings} width={width} height={height} onClose={() => setDisplayOpen(false)}
+        <DisplayScreen tv={isTV} timer={timer} now={now} settings={settings} width={width} height={height} onClose={() => setDisplayOpen(false)}
           onToggle={() => act(E.toggle)} onReset={() => act(E.reset)} onSkip={() => act(E.skip)} />
       </Modal>
 
@@ -289,8 +292,10 @@ function Main() {
   );
 }
 
-function DisplayScreen({ timer, now, settings, width, height, onClose, onToggle, onReset, onSkip }) {
-  const insets = useSafeAreaInsets();
+function DisplayScreen({ tv, timer, now, settings, width, height, onClose, onToggle, onReset, onSkip }) {
+  const sa = useSafeAreaInsets();
+  // TVs costumam cortar as bordas da imagem: usa as margens seguras do Android TV
+  const insets = tv ? { top: 27, bottom: 27, left: 40, right: 40 } : sa;
   const [ui, setUi] = useState(true);
   const hideT = useRef(null);
   const landscapeShort = width > height && height < 520;
@@ -312,19 +317,21 @@ function DisplayScreen({ timer, now, settings, width, height, onClose, onToggle,
   const mainInk = timer.running ? C.white : (hc ? C.white : C.onCyan);
 
   const Ctl = ({ icon, onPress, main, label }) => (
-    <Pressable accessibilityLabel={label} onPress={() => { tap(); onPress(); wake(); }}
+    <Pressable accessibilityLabel={label} onPress={() => { if (!ui) { wake(); return; } tap(); onPress(); wake(); }} onFocus={wake}
+      hasTVPreferredFocus={!!main}
       style={({ pressed }) => [st.ctl, landscapeShort && st.ctlSmall, { backgroundColor: main ? mainBg : btnBg, borderColor: hc ? "rgba(10,26,51,0.16)" : C.line }, main && (landscapeShort ? { height: 64 } : { flex: 1.6 }), pressed && { opacity: 0.8 }]}>
       <Icon name={icon} size={26} color={main ? mainInk : ink} />
     </Pressable>
   );
 
   return (
-    <Pressable style={{ flex: 1 }} onPress={wake}>
+    <RNPressable style={{ flex: 1 }} onPress={wake} focusable={false}>
       <DisplayView timer={timer} now={now} settings={settings} width={width} height={height}
         insets={{ top: Math.max(insets.top, 8), bottom: insets.bottom, left: insets.left, right: insets.right }}
         reserveRight={landscapeShort ? 76 : 0} reserveBottom={landscapeShort ? 0 : 88} />
-      {ui ? (
-        <View style={[
+      {/* os controles continuam focáveis pelo controle remoto mesmo esmaecidos */}
+      {(
+        <View style={[{ opacity: ui ? 1 : 0.08 },
           st.ctls, { backgroundColor: ctlBg, borderColor: hc ? "rgba(10,26,51,0.16)" : C.lineStrong },
           landscapeShort
             ? { right: S[3] + insets.right, top: (height - colH) / 2, flexDirection: "column", padding: 6, gap: 6 }
@@ -335,8 +342,8 @@ function DisplayScreen({ timer, now, settings, width, height, onClose, onToggle,
           <Ctl icon={timer.running ? "pause" : "play"} label="Iniciar ou pausar" onPress={onToggle} main />
           <Ctl icon="skip" label="Pular etapa" onPress={onSkip} />
         </View>
-      ) : null}
-    </Pressable>
+      )}
+    </RNPressable>
   );
 }
 

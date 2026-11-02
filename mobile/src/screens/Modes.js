@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import Pressable from "../Touch";
 import Icon from "../icons";
 import { MODES, fmt } from "../engine";
 import { C, F, R, S, textOn } from "../theme";
