@@ -1,7 +1,7 @@
 // CT MAX TIMER — app Android (React Native / Expo). Funciona sozinho, sem servidor.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert, AppState, BackHandler, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
+  Alert, AppState, BackHandler, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from "react-native";
 import Pressable from "./src/Touch";
 import { Pressable as RNPressable } from "react-native";
@@ -17,7 +17,7 @@ import Icon from "./src/icons";
 import * as E from "./src/engine";
 import { initSounds, play } from "./src/sound";
 import { DEFAULT_SETTINGS, defaultScore, usePersisted } from "./src/store";
-import { C, F, R, S, fontFiles, textOn } from "./src/theme";
+import { C, F, PARTNER_LOGOS, R, S, fontFiles, textOn } from "./src/theme";
 import { Btn, tap } from "./src/ui";
 import Modes from "./src/screens/Modes";
 import Session from "./src/screens/Session";
@@ -203,7 +203,10 @@ function Main() {
       {/* barra superior */}
       <View style={[st.appbar, { paddingTop: insets.top, height: 60 + insets.top }]}>
         <View style={[st.mark, { backgroundColor: brand }]}><Text style={[st.markText, { color: textOn(brand) }]}>CT</Text></View>
-        <Text numberOfLines={1} style={st.brandName}>{settings.gym_name || "CT MAX TIMER"}</Text>
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: S[2] }}>
+          <Text numberOfLines={1} style={st.brandName}>{settings.gym_name || "CT MAX TIMER"}</Text>
+          {PARTNER_LOGOS.map((src, i) => <Image key={i} source={src} style={{ width: 34, height: 34, resizeMode: "contain" }} />)}
+        </View>
         {timer.phase === "work" || timer.phase === "rest" ? (
           <Pressable onPress={() => { tap(); setDisplayOpen(true); }} style={[st.livePill, { borderColor: brand }]}>
             <View style={[st.liveDot, { backgroundColor: brand }]} />
@@ -368,7 +371,7 @@ const st = StyleSheet.create({
   appbar: { flexDirection: "row", alignItems: "center", gap: S[3], paddingHorizontal: S[4], backgroundColor: C.navy950, borderBottomWidth: 1, borderBottomColor: C.line },
   mark: { width: 36, height: 36, borderRadius: R.sm, alignItems: "center", justifyContent: "center" },
   markText: { fontFamily: F.wide, fontSize: 14 },
-  brandName: { flex: 1, fontFamily: F.wide, fontSize: 16, color: C.white, textTransform: "uppercase" },
+  brandName: { flexShrink: 1, fontFamily: F.wide, fontSize: 16, color: C.white, textTransform: "uppercase" },
   livePill: { flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, height: 36 },
   liveDot: { width: 8, height: 8, borderRadius: 4 },
   liveText: { fontFamily: F.narrow, fontSize: 18, color: C.white, fontVariant: ["tabular-nums"] },

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Image, StyleSheet, Text, View } from "react-native";
 import { STATUS, fmt, nextStep, remainingMs, visualState } from "./engine";
-import { C, F } from "./theme";
+import { C, F, PARTNER_LOGOS } from "./theme";
 
 export function palette(hc) {
   return hc
@@ -72,6 +72,9 @@ export default function DisplayView({ timer, now, settings, width, height, inset
             <Text numberOfLines={1} style={{ fontFamily: F.wide, color: p.t1, fontSize: Math.max(15, 2.8 * vmin), textTransform: "uppercase", flexShrink: 1 }}>
               {settings.gym_name || "CT MAX TIMER"}
             </Text>
+            {PARTNER_LOGOS.map((src, i) => (
+              <Image key={i} source={src} style={{ width: Math.max(36, 8 * vmin), height: Math.max(36, 8 * vmin), resizeMode: "contain" }} />
+            ))}
           </View>
           <View style={[s.row, { gap: 2 * vmin }]}>
             {!portrait ? (

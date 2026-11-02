@@ -58,4 +58,10 @@ export function textOn(hex) {
   return L > 0.18 ? C.onCyan : C.white;
 }
 
+// Logos fixos exibidos ao lado do nome (academia e parceiro)
+export const PARTNER_LOGOS = [
+  require("../assets/images/ct-angelo.png"),
+  require("../assets/images/acai.png"),
+];
+
 export const BRAND_SWATCHES = ["#22D3EE", "#67E8F9", "#5FB0C0", "#137385", "#FFFFFF"];
