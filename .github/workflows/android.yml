@@ -1,0 +1,94 @@
+name: Build APK (Android)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: mobile
+    env:
+      EXPO_NO_TELEMETRY: "1"
+      CI: "1"
+      APK_NAME: CT-MAX-TIMER-v1.0.${{ github.run_number }}.apk
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar projeto Android nativo (expo prebuild)
+        run: npx expo prebuild --platform android --no-install --clean 2>&1 | tee ../build.log
+
+      - name: Compilar APK (release)
+        run: |
+          set -o pipefail
+          cd android
+          ./gradlew assembleRelease --no-daemon \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a 2>&1 | tee -a ../../build.log
+          cp app/build/outputs/apk/release/app-release.apk "../../$APK_NAME"
+
+      - name: Guardar APK como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}
+          path: ${{ env.APK_NAME }}
+
+      - name: Publicar Release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" "$APK_NAME" \
+            --title "CT MAX TIMER v1.0.${{ github.run_number }}" \
+            --notes "APK para Android gerado automaticamente a partir do commit ${GITHUB_SHA::7}. Baixe o arquivo .apk abaixo e instale no celular (permita instalar apps de fontes desconhecidas)."
+
+      - name: Publicar APK no branch "apk"
+        working-directory: .
+        run: |
+          mkdir /tmp/apk && cp "$APK_NAME" /tmp/apk/ && cd /tmp/apk
+          git init -q -b apk
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git add . && git commit -qm "APK ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk
+
+      - name: Salvar log em caso de falha
+        if: failure()
+        working-directory: .
+        run: |
+          mkdir /tmp/log && tail -c 400000 build.log > /tmp/log/build.log 2>/dev/null || echo "sem log" > /tmp/log/build.log
+          cd /tmp/log
+          git init -q -b build-log
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git add . && git commit -qm "log ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" build-log
