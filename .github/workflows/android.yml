@@ -46,19 +46,23 @@ jobs:
 
       - name: Instalar Android NDK
         run: |
+          set +o pipefail
           SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          echo "ANDROID_HOME=$ANDROID_HOME" | tee ../build.log
+          ls "$ANDROID_HOME/ndk" 2>&1 | tee -a ../build.log
           for i in 1 2 3; do
-            yes | "$SDKM" --install "ndk;27.1.12297006" > /tmp/ndk.log 2>&1 && break
-            echo "tentativa $i falhou, repetindo"; tail -5 /tmp/ndk.log
+            yes | "$SDKM" --install "ndk;27.1.12297006" >> ../build.log 2>&1
+            if [ -f "$ANDROID_HOME/ndk/27.1.12297006/source.properties" ]; then echo "NDK ok" | tee -a ../build.log; break; fi
+            echo "tentativa $i falhou" | tee -a ../build.log
             rm -rf "$ANDROID_HOME/ndk/27.1.12297006"; sleep 10
           done
-          test -f "$ANDROID_HOME/ndk/27.1.12297006/source.properties" && echo "NDK ok"
+          test -f "$ANDROID_HOME/ndk/27.1.12297006/source.properties"
 
       - name: Instalar dependências
         run: npm ci
 
       - name: Gerar projeto Android nativo (expo prebuild)
-        run: npx expo prebuild --platform android --no-install --clean 2>&1 | tee ../build.log
+        run: npx expo prebuild --platform android --no-install --clean 2>&1 | tee -a ../build.log
 
       - name: Compilar APK (release)
         run: |
