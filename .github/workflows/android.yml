@@ -44,6 +44,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Instalar Android NDK
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          for i in 1 2 3; do
+            yes | "$SDKM" --install "ndk;27.1.12297006" > /tmp/ndk.log 2>&1 && break
+            echo "tentativa $i falhou, repetindo"; tail -5 /tmp/ndk.log
+            rm -rf "$ANDROID_HOME/ndk/27.1.12297006"; sleep 10
+          done
+          test -f "$ANDROID_HOME/ndk/27.1.12297006/source.properties" && echo "NDK ok"
+
       - name: Instalar dependências
         run: npm ci
 
