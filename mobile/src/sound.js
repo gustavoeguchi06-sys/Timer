@@ -5,7 +5,7 @@ const FILES = {
   start: require("../assets/sounds/start.wav"),     // 1 toque: início do round
   end: require("../assets/sounds/end.wav"),         // 3 toques: fim do round
   done: require("../assets/sounds/done.wav"),       // 5 toques: fim da sessão
-  warning: require("../assets/sounds/warning.wav"), // aviso dos 10 segundos
+  beep: require("../assets/sounds/beep.wav"),       // contagem dos 10 segundos finais
 };
 
 let players = null;

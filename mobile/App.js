@@ -71,7 +71,7 @@ function Main() {
   // ---------- relógio: avança etapas e dispara os sons ----------
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
-  const last = useRef({ key: null, sec: null, warned: null });
+  const last = useRef({ key: null, sec: null });
 
   const step = useCallback(() => {
     const t0 = Date.now();
@@ -87,11 +87,10 @@ function Main() {
       }
       L.key = key;
       const sec = Math.ceil(E.remainingMs(n, t0) / 1000 - 0.001);
-      if (n.running && n.warn && n.phase === "work" && n.work > 10 && L.sec !== null && L.sec > 10 && sec <= 10 && sec > 0 && L.warned !== n.round) {
-        L.warned = n.round;
-        play("warning", settingsRef.current);
+      // beep a cada segundo nos últimos 10 segundos do round (não toca no descanso)
+      if (n.running && n.warn && n.phase === "work" && n.work > 10 && L.sec !== null && sec !== L.sec && sec <= 10 && sec > 0) {
+        play("beep", settingsRef.current);
       }
-      if (n.phase !== "work" || sec > 10) L.warned = null;
       L.sec = sec;
       return n === t ? t : n;
     });
@@ -148,7 +147,7 @@ function Main() {
     const prev = E.tick(timer, t0);
     const n = fn(prev, t0);
     if ((prev.phase === "idle" || prev.phase === "done") && n.phase === "work" && n.running) play("start", settings);
-    last.current = { key: `${n.phase}:${n.round}`, sec: null, warned: null };
+    last.current = { key: `${n.phase}:${n.round}`, sec: null };
     setTimer(n);
     setNow(t0);
   };
@@ -168,7 +167,7 @@ function Main() {
   const startSession = () => {
     const t = Date.now();
     play("start", settings);
-    last.current = { key: "work:1", sec: null, warned: null };
+    last.current = { key: "work:1", sec: null };
     setTimer(E.start(E.configure(cfg.mode, cfg.work, cfg.rest, cfg.rounds, cfg.warn), t));
     setNow(t);
     setDisplayOpen(true);

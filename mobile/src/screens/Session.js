@@ -26,7 +26,7 @@ export default function Session({ cfg, setCfg, brand, wide }) {
         <Chips options={[1, 3, 5, 8, 10, 12]} value={cfg.rounds} onChange={set("rounds")} brand={brand} />
       </Card>
       <Card style={{ paddingVertical: S[3] }}>
-        <ToggleRow label="Aviso dos 10 segundos" hint="Batidas de madeira antes do fim do round" value={cfg.warn} onChange={set("warn")} brand={brand} />
+        <ToggleRow label="Aviso dos 10 segundos" hint="Beep a cada segundo de 10 até 1" value={cfg.warn} onChange={set("warn")} brand={brand} />
       </Card>
     </View>
   );

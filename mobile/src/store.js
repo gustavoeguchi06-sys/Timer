@@ -2,25 +2,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useRef, useState } from "react";
 
-export const DEFAULT_PHRASES = [
-  "Disciplina vence talento quando o talento não treina.",
-  "Um round de cada vez.",
-  "Respire. Ajuste. Continue.",
-  "A faixa é só um pedaço de pano. O que importa é o treino.",
-  "Cansaço é parte do caminho.",
-  "Técnica primeiro, força depois.",
-];
-
 export const DEFAULT_SETTINGS = {
   gym_name: "CT MAX TIMER",
   logo: "",
   brand_color: "#22D3EE",
   sound: true,
   volume: 80,
-  show_phrases: true,
   show_next: true,
   high_contrast: false,
-  phrases: DEFAULT_PHRASES,
 };
 
 export const defaultScore = () => ({

@@ -93,7 +93,7 @@ export default function Academy({ settings, setSettings, timer, now, width, wide
       </Card>
 
       <Card>
-        <SectionHead title="Áudio" sub="Sino de início e fim, aviso dos 10 segundos." />
+        <SectionHead title="Áudio" sub="Sino de início e fim, beep nos últimos 10 segundos." />
         <ToggleRow label="Sons ativados" value={settings.sound} onChange={(v) => set({ sound: v })} brand={brand} />
         <View style={{ gap: S[2] }}>
           <FieldHead label="Volume" value={`${settings.volume}%`} />
@@ -104,25 +104,13 @@ export default function Academy({ settings, setSettings, timer, now, width, wide
           </View>
         </View>
         <Btn label="Testar som" icon="volume" variant="secondary" small style={{ alignSelf: "flex-start" }}
-          onPress={() => { play("warning", settings); setTimeout(() => play("start", settings), 1600); }} />
+          onPress={() => { [0, 1, 2].forEach((i) => setTimeout(() => play("beep", settings), i * 1000)); setTimeout(() => play("start", settings), 3000); }} />
       </Card>
 
       <Card>
         <SectionHead title="Exibição" sub="O que aparece na tela de exibição." />
-        <ToggleRow label="Frases motivacionais" value={settings.show_phrases} onChange={(v) => set({ show_phrases: v })} brand={brand} />
         <ToggleRow label="Próxima etapa" value={settings.show_next} onChange={(v) => set({ show_next: v })} brand={brand} />
         <ToggleRow label="Alto contraste" hint="Fundo branco para ambientes muito claros" value={settings.high_contrast} onChange={(v) => set({ high_contrast: v })} brand={brand} />
-        <View style={{ gap: S[2] }}>
-          <FieldHead label="Frases" hint="uma por linha" />
-          <TextInput
-            multiline
-            value={settings.phrases.join("\n")}
-            onChangeText={(v) => set({ phrases: v.split("\n").map((l) => l.slice(0, 120)) })}
-            onEndEditing={() => set({ phrases: settings.phrases.map((l) => l.trim()).filter(Boolean) })}
-            style={[st.input, { minHeight: 140, textAlignVertical: "top", paddingTop: S[3] }]}
-            placeholderTextColor={C.text3}
-          />
-        </View>
       </Card>
     </View>
   );

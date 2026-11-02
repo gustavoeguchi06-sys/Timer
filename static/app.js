@@ -25,10 +25,8 @@
     syncAt: 0,            // performance.now() do snapshot
     online: true,
     cfg: { mode: "round", work: 300, rest: 60, rounds: 5, warn: true },
-    phraseIdx: 0,
     lastKey: "",          // phase+round para detectar transições
     lastSec: null,
-    warnedRound: null,
   };
 
   const fmt = (sec) => {
@@ -82,27 +80,20 @@
     } catch (_) {}
   }
 
-  // Batida de madeira (as "palmas" dos 10 segundos): ruído curto filtrado
-  function knock(delay = 0) {
+  // Beep curto (tom puro com ataque rápido)
+  function tone(freq = 1046, dur = 0.14, delay = 0) {
     if (!soundEnabled()) return;
     try {
       const ctx = audio();
       const t0 = ctx.currentTime + delay;
-      const len = 0.08;
-      const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * len), ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 4);
-      const src = ctx.createBufferSource(); src.buffer = buf;
-      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1700; bp.Q.value = 3;
-      const g = ctx.createGain(); g.gain.value = masterVol() * 2.2;
-      // tom curto para dar "corpo" de madeira
-      const o = ctx.createOscillator(), og = ctx.createGain();
-      o.frequency.value = 900;
-      og.gain.setValueAtTime(masterVol() * 0.35, t0);
-      og.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
-      src.connect(bp).connect(g).connect(ctx.destination);
-      o.connect(og).connect(ctx.destination);
-      src.start(t0); o.start(t0); o.stop(t0 + 0.06);
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "square"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(masterVol() * 0.18, t0 + 0.005);
+      g.gain.setValueAtTime(masterVol() * 0.18, t0 + dur - 0.03);
+      g.gain.linearRampToValueAtTime(0, t0 + dur);
+      o.connect(g).connect(ctx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.02);
     } catch (_) {}
   }
 
@@ -110,7 +101,7 @@
     start:   () => bell(0, 620, 2.4),                                   // 1 toque de sino: começa
     end:     () => { bell(0, 620, 1.2); bell(0.35, 620, 1.2); bell(0.7, 620, 2); }, // 3 toques: fim do round
     done:    () => { [0, 0.3, 0.6, 0.9, 1.2].forEach((d) => bell(d, 620, d === 1.2 ? 2.5 : 1)); },
-    warning: () => { knock(0); knock(0.16); knock(0.32); knock(0.75); knock(0.91); knock(1.07); }, // 10s
+    beep:    () => tone(1046, 0.14),                                     // contagem dos 10s finais
   };
   const soundsOn = () => !$("#display").hidden; // só o dispositivo que está exibindo toca
 
@@ -277,10 +268,8 @@
     $("#soundToggle").checked = s.sound;
     $("#volumeRange").value = s.volume;
     $("#volumeOut").textContent = s.volume + "%";
-    $("#phraseToggle").checked = s.show_phrases;
     $("#nextToggle").checked = s.show_next;
     $("#contrastToggle").checked = s.high_contrast;
-    $("#phrasesInput").value = s.phrases.join("\n");
   }
 
   $("#gymName").addEventListener("input", (e) => saveSettings({ gym_name: e.target.value }));
@@ -290,12 +279,9 @@
     $("#volumeOut").textContent = e.target.value + "%";
     saveSettings({ volume: +e.target.value });
   });
-  $("#phraseToggle").addEventListener("change", (e) => saveSettings({ show_phrases: e.target.checked }, 0));
   $("#nextToggle").addEventListener("change", (e) => saveSettings({ show_next: e.target.checked }, 0));
   $("#contrastToggle").addEventListener("change", (e) => saveSettings({ high_contrast: e.target.checked }, 0));
-  $("#phrasesInput").addEventListener("input", (e) =>
-    saveSettings({ phrases: e.target.value.split("\n").map((l) => l.trim()).filter(Boolean) }, 800));
-  $("#testSound").addEventListener("click", () => { sounds.warning(); setTimeout(sounds.start, 1700); });
+  $("#testSound").addEventListener("click", () => { [0, 1, 2].forEach((i) => setTimeout(sounds.beep, i * 1000)); setTimeout(sounds.start, 3000); });
   $("#logoClear").addEventListener("click", () => saveSettings({ logo: "" }, 0));
   $("#logoInput").addEventListener("change", (e) => {
     const file = e.target.files[0];
@@ -339,10 +325,8 @@
       const logo = $(".d-logo", root);
       logo.hidden = !s.logo;
       if (s.logo) logo.src = s.logo;
-      $(".d-phrase", root).hidden = !s.show_phrases;
       $(".d-next", root).style.visibility = s.show_next ? "visible" : "hidden";
     });
-    updatePhrase(true);
   }
 
   // Prévia ao vivo: clone da tela de exibição em escala reduzida
@@ -402,7 +386,6 @@
         else if (t.phase === "rest") sounds.end();
         else if (t.phase === "done") sounds.done();
       }
-      updatePhrase();
     }
     S.lastKey = phaseKey;
   }
@@ -453,20 +436,7 @@
     done:   ["✓", "CONCLUÍDO"],
   };
 
-  function updatePhrase(instant = false) {
-    const list = (S.settings && S.settings.phrases) || [];
-    if (!list.length) return;
-    const t = S.timer;
-    const idx = t ? (t.round - 1) % list.length : 0;
-    displays().forEach((root) => {
-      const el = $(".d-phrase", root);
-      const text = `“${list[idx]}”`;
-      if (el.textContent === text) return;
-      if (instant) { el.textContent = text; return; }
-      el.classList.add("fade");
-      setTimeout(() => { el.textContent = text; el.classList.remove("fade"); }, 600);
-    });
-  }
+
 
   function render() {
     const t = S.timer;
@@ -503,14 +473,11 @@
         $("#ctlPlay").innerHTML = `<svg class="i"><use href="#i-${t.running ? "pause" : "play"}"/></svg>`;
       }
 
-      // aviso único quando o round chega aos 10 últimos segundos (não toca no descanso)
+      // beep a cada segundo nos últimos 10 segundos do round (não toca no descanso)
       if (t.running && t.warn && t.phase === "work" && t.work > 10 &&
-          S.lastSec !== null && S.lastSec > 10 && shown <= 10 && shown > 0 &&
-          S.warnedRound !== t.round && soundsOn()) {
-        S.warnedRound = t.round;
-        sounds.warning();
+          S.lastSec !== null && shown !== S.lastSec && shown <= 10 && shown > 0 && soundsOn()) {
+        sounds.beep();
       }
-      if (t.phase !== "work" || shown > 10) S.warnedRound = null;
       S.lastSec = shown;
       document.title = `${fmt(shown)} · ${STATUS[state][1]}`;
     }
@@ -571,7 +538,6 @@
     renderConfig();
     $$(".mode-card").forEach((c) => c.classList.toggle("selected", c.dataset.mode === t.mode));
     await loadTemplates();
-    updatePhrase(true);
     if (isTv) openDisplay();
     requestAnimationFrame(render);
     setTimeout(poll, 500);

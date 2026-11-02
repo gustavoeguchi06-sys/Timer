@@ -55,8 +55,6 @@ export default function DisplayView({ timer, now, settings, width, height, inset
     return () => loop.stop();
   }, [timer.running, final, pulse]);
 
-  const list = settings.phrases?.length ? settings.phrases : [];
-  const phrase = list.length ? list[(timer.round - 1) % list.length] : "";
   const next = nextStep(timer);
   const roundTxt = timer.rounds > 1
     ? ["ROUND ", String(Math.min(timer.round, timer.rounds)), ` DE ${timer.rounds}`]
@@ -111,11 +109,6 @@ export default function DisplayView({ timer, now, settings, width, height, inset
             <Text style={{ color: stateTxt, fontSize: short ? 14 : base * 1.15, fontFamily: F.wide, letterSpacing: base * 0.2 }}>{label}</Text>
           </View>
 
-          {settings.show_phrases && phrase && !short ? (
-            <Text style={{ fontFamily: F.medium, color: p.t2, fontSize: Math.max(13, 2.2 * vmin), textAlign: "center", maxWidth: innerW }}>
-              “{phrase}”
-            </Text>
-          ) : null}
         </View>
 
         {/* rodapé */}

@@ -165,7 +165,7 @@
       <div class="card row-toggle">
         <div>
           <label class="field-label" for="warnToggle">Aviso dos 10 segundos</label>
-          <p class="field-hint">Batidas de madeira antes do fim do round</p>
+          <p class="field-hint">Beep a cada segundo de 10 até 1</p>
         </div>
         <label class="switch"><input type="checkbox" id="warnToggle" checked><span></span></label>
       </div>
@@ -229,7 +229,7 @@
       <section class="card settings-card">
         <header class="block-head">
           <h2 class="block-title">Áudio</h2>
-          <p class="block-sub">Sino de início e fim, aviso dos 10 segundos.</p>
+          <p class="block-sub">Sino de início e fim, beep nos últimos 10 segundos.</p>
         </header>
         <div class="row-toggle">
           <label class="field-label" for="soundToggle">Sons ativados</label>
@@ -251,10 +251,6 @@
           <p class="block-sub">O que aparece na tela da TV.</p>
         </header>
         <div class="row-toggle">
-          <label class="field-label" for="phraseToggle">Frases motivacionais</label>
-          <label class="switch"><input type="checkbox" id="phraseToggle" checked><span></span></label>
-        </div>
-        <div class="row-toggle">
           <label class="field-label" for="nextToggle">Próxima etapa</label>
           <label class="switch"><input type="checkbox" id="nextToggle" checked><span></span></label>
         </div>
@@ -264,10 +260,6 @@
             <p class="field-hint">Fundo branco para ambientes muito claros</p>
           </div>
           <label class="switch"><input type="checkbox" id="contrastToggle"><span></span></label>
-        </div>
-        <div class="field">
-          <label class="field-label" for="phrasesInput">Frases <span class="field-hint">uma por linha</span></label>
-          <textarea id="phrasesInput" class="text-input" rows="5"></textarea>
         </div>
       </section>
     </div>
@@ -343,7 +335,6 @@
       <div class="d-time">05:00</div>
     </div>
     <div class="d-status"><span class="d-status-icon">■</span><span class="d-status-text">PRONTO</span></div>
-    <div class="d-phrase"></div>
   </div>
 
   <div class="d-footer">
