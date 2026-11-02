@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A1A33">
+<title>CT MAX TIMER</title>
+<link rel="preload" href="fonts/archivo-wdth.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= ÍCONES (SVG sprite) ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-round" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6M12 2v3"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-mat" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-score" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="1"/><path d="M12 5v14M6 10v4M16 10h2v2h-2v2h2"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="1"/><path d="M8 21h8M12 17v4"/><path d="M10 8.5v5l4-2.5z" fill="currentColor"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 4v16l10-8z" fill="currentColor"/><path d="M19 4v16"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></symbol>
+  </defs>
+</svg>
+
+<!-- ================= CABEÇALHO / NAVEGAÇÃO ================= -->
+<header class="appbar">
+  <div class="appbar-inner">
+    <a class="brand" href="/" aria-label="CT MAX TIMER — início">
+      <span class="brand-mark" aria-hidden="true">CT</span>
+      <img id="navLogo" class="nav-logo" alt="" hidden>
+      <span id="navName" class="brand-name">CT MAX TIMER</span>
+    </a>
+
+    <nav class="tabs" aria-label="Seções">
+      <button class="tab active" data-view="modes"><svg class="i"><use href="#i-grid"/></svg><span>Modos</span></button>
+      <button class="tab" data-view="config"><svg class="i"><use href="#i-clock"/></svg><span>Sessão</span></button>
+      <button class="tab" data-view="custom"><svg class="i"><use href="#i-flag"/></svg><span>Academia</span></button>
+      <button class="tab" data-view="score"><svg class="i"><use href="#i-score"/></svg><span>Placar</span></button>
+      <button class="tab tab-display" data-view="display"><svg class="i"><use href="#i-tv"/></svg><span>Exibição</span></button>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+
+<!-- ================= TELA 1 — MODOS ================= -->
+<section class="view active" id="view-modes" aria-labelledby="t-modes">
+  <header class="page-head">
+    <p class="eyebrow">01 · Treino</p>
+    <h1 class="page-title" id="t-modes">Escolha o modo</h1>
+    <p class="page-sub">Selecione o formato do treino. Os tempos podem ser ajustados na próxima etapa.</p>
+  </header>
+
+  <div class="mode-grid" id="modeGrid">
+    <button class="mode-card" data-mode="round">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-round"/></svg></span><span class="mode-idx">01</span></span>
+      <span class="mode-name">Round Timer</span>
+      <span class="mode-desc">Rounds e descanso no formato clássico de luta.</span>
+      <span class="mode-spec">5 × 05:00 · 01:00</span>
+    </button>
+    <button class="mode-card" data-mode="tabata">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-bolt"/></svg></span><span class="mode-idx">02</span></span>
+      <span class="mode-name">Tabata</span>
+      <span class="mode-desc">Intervalado de alta intensidade.</span>
+      <span class="mode-spec">8 × 00:20 · 00:10</span>
+    </button>
+    <button class="mode-card" data-mode="circuit">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-loop"/></svg></span><span class="mode-idx">03</span></span>
+      <span class="mode-name">Circuito</span>
+      <span class="mode-desc">Estações com troca rápida entre exercícios.</span>
+      <span class="mode-spec">10 × 00:45 · 00:15</span>
+    </button>
+    <button class="mode-card" data-mode="openmat">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-mat"/></svg></span><span class="mode-idx">04</span></span>
+      <span class="mode-name">Open Mat</span>
+      <span class="mode-desc">Contagem longa e contínua para treino livre.</span>
+      <span class="mode-spec">1 × 60:00</span>
+    </button>
+    <button class="mode-card" data-mode="score">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-score"/></svg></span><span class="mode-idx">05</span></span>
+      <span class="mode-name">Placar BJJ</span>
+      <span class="mode-desc">Pontos, vantagens e punições por atleta.</span>
+      <span class="mode-spec">Vermelho × Azul</span>
+    </button>
+    <button class="mode-card" data-mode="custom">
+      <span class="mode-top"><span class="mode-icon"><svg class="i"><use href="#i-sliders"/></svg></span><span class="mode-idx">06</span></span>
+      <span class="mode-name">Personalizado</span>
+      <span class="mode-desc">Defina seus próprios tempos e rounds.</span>
+      <span class="mode-spec">Livre</span>
+    </button>
+  </div>
+
+  <section class="block" id="templatesWrap" hidden>
+    <header class="block-head">
+      <h2 class="block-title">Modelos salvos</h2>
+      <p class="block-sub">Toque em “Usar” para carregar a configuração.</p>
+    </header>
+    <div class="template-list" id="templateList"></div>
+  </section>
+</section>
+
+<!-- ================= TELA 2 — SESSÃO ================= -->
+<section class="view" id="view-config" aria-labelledby="t-config">
+  <header class="page-head">
+    <p class="eyebrow">02 · Sessão</p>
+    <h1 class="page-title" id="t-config">Configuração <span class="tag" id="cfgModeLabel">Round Timer</span></h1>
+    <p class="page-sub">Ajuste com os botões ou arrastando a barra. Segure + ou − para alterar rápido.</p>
+  </header>
+
+  <div class="config-layout">
+    <div class="config-fields">
+      <div class="card field" data-field="work">
+        <div class="field-head">
+          <label class="field-label" for="workRange">Duração do round</label>
+          <span class="field-hint">Tempo de luta</span>
+        </div>
+        <div class="stepper">
+          <button class="step" data-delta="-5" aria-label="Diminuir duração do round">−</button>
+          <output class="step-value" id="workOut">05:00</output>
+          <button class="step" data-delta="5" aria-label="Aumentar duração do round">+</button>
+        </div>
+        <input type="range" id="workRange" min="5" max="3600" step="5" value="300">
+      </div>
+
+      <div class="card field" data-field="rest">
+        <div class="field-head">
+          <label class="field-label" for="restRange">Duração do descanso</label>
+          <span class="field-hint">Entre rounds</span>
+        </div>
+        <div class="stepper">
+          <button class="step" data-delta="-5" aria-label="Diminuir descanso">−</button>
+          <output class="step-value" id="restOut">01:00</output>
+          <button class="step" data-delta="5" aria-label="Aumentar descanso">+</button>
+        </div>
+        <input type="range" id="restRange" min="0" max="600" step="5" value="60">
+      </div>
+
+      <div class="card field" data-field="rounds">
+        <div class="field-head">
+          <label class="field-label" for="roundsRange">Quantidade de rounds</label>
+          <span class="field-hint">1 a 30</span>
+        </div>
+        <div class="stepper">
+          <button class="step" data-delta="-1" aria-label="Menos rounds">−</button>
+          <output class="step-value" id="roundsOut">5</output>
+          <button class="step" data-delta="1" aria-label="Mais rounds">+</button>
+        </div>
+        <input type="range" id="roundsRange" min="1" max="30" step="1" value="5">
+      </div>
+
+      <div class="card row-toggle">
+        <div>
+          <label class="field-label" for="warnToggle">Aviso dos 10 segundos</label>
+          <p class="field-hint">Batidas de madeira antes do fim do round</p>
+        </div>
+        <label class="switch"><input type="checkbox" id="warnToggle" checked><span></span></label>
+      </div>
+    </div>
+
+    <aside class="card summary-card" aria-label="Resumo da sessão">
+      <p class="eyebrow">Duração total</p>
+      <p class="summary-total" id="sumTotal">29:00</p>
+      <div class="timeline" id="timeline" aria-hidden="true"></div>
+      <div class="legend"><span><i class="lg-work"></i>Round</span><span><i class="lg-rest"></i>Descanso</span></div>
+      <p class="summary-text" id="sessionSummary"></p>
+
+      <div class="action-bar">
+        <button class="btn btn-secondary" id="saveTemplateBtn"><svg class="i"><use href="#i-save"/></svg>Salvar modelo</button>
+        <button class="btn btn-primary" id="startSessionBtn"><svg class="i"><use href="#i-play"/></svg>Iniciar sessão</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= TELA 3 — ACADEMIA ================= -->
+<section class="view" id="view-custom" aria-labelledby="t-custom">
+  <header class="page-head">
+    <p class="eyebrow">03 · Marca</p>
+    <h1 class="page-title" id="t-custom">Personalização da academia</h1>
+    <p class="page-sub">As alterações aparecem na prévia e na TV na hora.</p>
+  </header>
+
+  <div class="custom-layout">
+    <div class="preview-col">
+      <div class="preview-label"><span class="eyebrow">Prévia da TV</span><span class="live-dot">Ao vivo</span></div>
+      <div class="preview-frame" aria-label="Prévia da tela de TV">
+        <div class="preview-scale" id="previewHost"></div>
+      </div>
+    </div>
+
+    <div class="settings-col">
+      <section class="card settings-card">
+        <header class="block-head">
+          <h2 class="block-title">Identidade</h2>
+          <p class="block-sub">Nome, logo e cor de destaque.</p>
+        </header>
+        <div class="field">
+          <label class="field-label" for="gymName">Nome da academia</label>
+          <input type="text" id="gymName" class="text-input" maxlength="40" placeholder="Ex.: CT MAX">
+        </div>
+        <div class="field">
+          <span class="field-label">Logo</span>
+          <div class="upload-row">
+            <div class="logo-thumb"><img id="logoThumb" alt="" hidden><span id="logoEmpty">Sem logo</span></div>
+            <label class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-upload"/></svg>Enviar<input type="file" id="logoInput" accept="image/*" hidden></label>
+            <button class="btn btn-ghost btn-sm" id="logoClear">Remover</button>
+          </div>
+        </div>
+        <div class="row-toggle">
+          <label class="field-label" for="brandColor">Cor de destaque</label>
+          <input type="color" id="brandColor" value="#22D3EE">
+        </div>
+      </section>
+
+      <section class="card settings-card">
+        <header class="block-head">
+          <h2 class="block-title">Áudio</h2>
+          <p class="block-sub">Sino de início e fim, aviso dos 10 segundos.</p>
+        </header>
+        <div class="row-toggle">
+          <label class="field-label" for="soundToggle">Sons ativados</label>
+          <label class="switch"><input type="checkbox" id="soundToggle" checked><span></span></label>
+        </div>
+        <div class="field">
+          <div class="field-head">
+            <label class="field-label" for="volumeRange">Volume</label>
+            <output class="field-value" id="volumeOut">80%</output>
+          </div>
+          <input type="range" id="volumeRange" min="0" max="100" value="80">
+        </div>
+        <button class="btn btn-secondary btn-sm" id="testSound"><svg class="i"><use href="#i-volume"/></svg>Testar som</button>
+      </section>
+
+      <section class="card settings-card">
+        <header class="block-head">
+          <h2 class="block-title">Exibição</h2>
+          <p class="block-sub">O que aparece na tela da TV.</p>
+        </header>
+        <div class="row-toggle">
+          <label class="field-label" for="phraseToggle">Frases motivacionais</label>
+          <label class="switch"><input type="checkbox" id="phraseToggle" checked><span></span></label>
+        </div>
+        <div class="row-toggle">
+          <label class="field-label" for="nextToggle">Próxima etapa</label>
+          <label class="switch"><input type="checkbox" id="nextToggle" checked><span></span></label>
+        </div>
+        <div class="row-toggle">
+          <div>
+            <label class="field-label" for="contrastToggle">Alto contraste</label>
+            <p class="field-hint">Fundo branco para ambientes muito claros</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="contrastToggle"><span></span></label>
+        </div>
+        <div class="field">
+          <label class="field-label" for="phrasesInput">Frases <span class="field-hint">uma por linha</span></label>
+          <textarea id="phrasesInput" class="text-input" rows="5"></textarea>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TELA 4 — PLACAR ================= -->
+<section class="view" id="view-score" aria-labelledby="t-score">
+  <header class="page-head page-head-row">
+    <div>
+      <p class="eyebrow">04 · Competição</p>
+      <h1 class="page-title" id="t-score">Placar</h1>
+    </div>
+    <div class="head-actions">
+      <button class="btn btn-ghost btn-sm" id="scoreReset"><svg class="i"><use href="#i-reset"/></svg>Zerar</button>
+      <button class="btn btn-secondary btn-sm" id="scoreFull"><svg class="i"><use href="#i-expand"/></svg>Tela cheia</button>
+    </div>
+  </header>
+
+  <div class="score-board" id="scoreBoard">
+    <article class="athlete red" data-side="red">
+      <header class="athlete-head">
+        <span class="corner">Vermelho</span>
+        <input class="athlete-name" value="Atleta Vermelho" aria-label="Nome do atleta vermelho">
+      </header>
+      <div class="athlete-score" data-k="pts">0</div>
+      <div class="pts-buttons" role="group" aria-label="Pontos vermelho">
+        <button data-add="2">+2</button><button data-add="3">+3</button><button data-add="4">+4</button><button data-add="-1" class="minus">−1</button>
+      </div>
+      <div class="partials">
+        <div class="partial adv"><span class="partial-label">Vantagens</span><div class="pctl"><button data-k="adv" data-d="-1" aria-label="Remover vantagem">−</button><b data-k="adv">0</b><button data-k="adv" data-d="1" aria-label="Adicionar vantagem">+</button></div></div>
+        <div class="partial pen"><span class="partial-label">Punições</span><div class="pctl"><button data-k="pen" data-d="-1" aria-label="Remover punição">−</button><b data-k="pen">0</b><button data-k="pen" data-d="1" aria-label="Adicionar punição">+</button></div></div>
+      </div>
+    </article>
+
+    <article class="athlete blue" data-side="blue">
+      <header class="athlete-head">
+        <span class="corner">Azul</span>
+        <input class="athlete-name" value="Atleta Azul" aria-label="Nome do atleta azul">
+      </header>
+      <div class="athlete-score" data-k="pts">0</div>
+      <div class="pts-buttons" role="group" aria-label="Pontos azul">
+        <button data-add="2">+2</button><button data-add="3">+3</button><button data-add="4">+4</button><button data-add="-1" class="minus">−1</button>
+      </div>
+      <div class="partials">
+        <div class="partial adv"><span class="partial-label">Vantagens</span><div class="pctl"><button data-k="adv" data-d="-1" aria-label="Remover vantagem">−</button><b data-k="adv">0</b><button data-k="adv" data-d="1" aria-label="Adicionar vantagem">+</button></div></div>
+        <div class="partial pen"><span class="partial-label">Punições</span><div class="pctl"><button data-k="pen" data-d="-1" aria-label="Remover punição">−</button><b data-k="pen">0</b><button data-k="pen" data-d="1" aria-label="Adicionar punição">+</button></div></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= TELA PRINCIPAL — EXIBIÇÃO (TV) ================= -->
+<section class="display" id="display" data-state="idle" hidden>
+  <div class="grain"></div>
+
+  <div class="d-top">
+    <div class="d-brand">
+      <img class="d-logo" alt="" hidden>
+      <span class="d-name">CT MAX TIMER</span>
+    </div>
+    <div class="d-meta">
+      <span class="d-mode">ROUND TIMER</span>
+      <span class="d-conn"><i></i><span>Online</span></span>
+    </div>
+  </div>
+
+  <div class="d-center">
+    <div class="d-round">ROUND 1 DE 5</div>
+    <div class="d-time-wrap">
+      <div class="d-time">05:00</div>
+    </div>
+    <div class="d-status"><span class="d-status-icon">■</span><span class="d-status-text">PRONTO</span></div>
+    <div class="d-phrase"></div>
+  </div>
+
+  <div class="d-footer">
+    <div class="d-progress" aria-hidden="true"><i></i></div>
+    <div class="d-bottom">
+      <span class="d-hint">ESPAÇO iniciar/pausar · R reiniciar · → pular · F tela cheia · ESC sair · Controle remoto: <b class="d-url"></b></span>
+      <span class="d-next">Próximo: Descanso | 01:00</span>
+    </div>
+  </div>
+
+  <div class="d-controls" id="dControls">
+    <button class="ctl" id="ctlExit" title="Sair (Esc)" aria-label="Sair"><svg class="i"><use href="#i-x"/></svg></button>
+    <button class="ctl" id="ctlReset" title="Reiniciar (R)" aria-label="Reiniciar"><svg class="i"><use href="#i-reset"/></svg></button>
+    <button class="ctl ctl-main" id="ctlPlay" title="Iniciar/Pausar (Espaço)" aria-label="Iniciar ou pausar"><svg class="i"><use href="#i-play"/></svg></button>
+    <button class="ctl" id="ctlSkip" title="Pular etapa (→)" aria-label="Pular etapa"><svg class="i"><use href="#i-skip"/></svg></button>
+    <button class="ctl" id="ctlFull" title="Tela cheia (F)" aria-label="Tela cheia"><svg class="i"><use href="#i-expand"/></svg></button>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
