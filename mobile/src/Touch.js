@@ -1,16 +1,24 @@
 // Pressable com anel de foco visível — necessário para navegar com as setas
 // do controle remoto da TV Box. No celular (toque) o anel não aparece.
 import { forwardRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { C } from "./theme";
 
-const Touch = forwardRef(function Touch({ style, children, ringRadius = 10, focusable = true, onFocus, onBlur, ...props }, ref) {
+// Na web (iPhone/PWA), um toque também dá foco ao elemento: só mostra o anel
+// quando a última interação foi pelo teclado/controle remoto.
+let keyboardMode = Platform.OS !== "web";
+if (Platform.OS === "web" && typeof window !== "undefined") {
+  window.addEventListener("keydown", () => { keyboardMode = true; }, true);
+  window.addEventListener("pointerdown", () => { keyboardMode = false; }, true);
+}
+
+const Touch = forwardRef(function Touch({ style, children, ringRadius = 10, ringColor, focusable = true, onFocus, onBlur, ...props }, ref) {
   const [focused, setFocused] = useState(false);
   return (
     <Pressable
       ref={ref}
       focusable={focusable}
-      onFocus={(e) => { setFocused(true); onFocus && onFocus(e); }}
+      onFocus={(e) => { if (keyboardMode) setFocused(true); onFocus && onFocus(e); }}
       onBlur={(e) => { setFocused(false); onBlur && onBlur(e); }}
       style={(state) => (typeof style === "function" ? style({ ...state, focused }) : style)}
       {...props}
@@ -18,7 +26,7 @@ const Touch = forwardRef(function Touch({ style, children, ringRadius = 10, focu
       {(state) => (
         <>
           {typeof children === "function" ? children({ ...state, focused }) : children}
-          {focused ? <View pointerEvents="none" style={[st.ring, { borderRadius: ringRadius + 3 }]} /> : null}
+          {focused ? <View pointerEvents="none" style={[st.ring, { borderRadius: ringRadius + 3 }, ringColor && { borderColor: ringColor }]} /> : null}
         </>
       )}
     </Pressable>

@@ -3,7 +3,7 @@
 // - não exige tela de toque (a TV usa controle remoto)
 const fs = require("fs");
 const path = require("path");
-const { AndroidConfig, withAndroidManifest, withDangerousMod } = require("expo/config-plugins");
+const { AndroidConfig, withAndroidManifest, withDangerousMod, withMainActivity } = require("expo/config-plugins");
 
 function withTvManifest(config) {
   return withAndroidManifest(config, (c) => {
@@ -43,6 +43,42 @@ function withTvBanner(config) {
   ]);
 }
 
+// Repassa as teclas (setas, OK, play/pause, avançar...) para o JavaScript como evento "ctmaxKey".
+// Funciona em qualquer aparelho, inclusive TV Box que não se identifica como Android TV,
+// e não depende de qual botão está com o foco.
+const KEY_METHOD = `
+  // CT MAX TIMER: repassa as teclas do controle remoto para o JavaScript
+  override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+    try {
+      if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+        val ctx = (application as com.facebook.react.ReactApplication).reactHost?.currentReactContext
+        if (ctx != null && ctx.hasActiveReactInstance()) {
+          val map = com.facebook.react.bridge.Arguments.createMap()
+          map.putInt("keyCode", event.keyCode)
+          map.putInt("repeat", event.repeatCount)
+          ctx.getJSModule(com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)?.emit("ctmaxKey", map)
+        }
+      }
+    } catch (e: Throwable) {
+    }
+    return super.dispatchKeyEvent(event)
+  }
+`;
+
+function withKeyEvents(config) {
+  return withMainActivity(config, (c) => {
+    let src = c.modResults.contents;
+    if (c.modResults.language !== "kt") throw new Error("withAndroidTV: MainActivity precisa ser Kotlin");
+    if (!src.includes("ctmaxKey")) {
+      const re = /class MainActivity\s*:\s*ReactActivity\(\)\s*\{/;
+      if (!re.test(src)) throw new Error("withAndroidTV: não encontrei a classe MainActivity");
+      src = src.replace(re, (m) => m + "\n" + KEY_METHOD);
+    }
+    c.modResults.contents = src;
+    return c;
+  });
+}
+
 module.exports = function withAndroidTV(config) {
-  return withTvBanner(withTvManifest(config));
+  return withKeyEvents(withTvBanner(withTvManifest(config)));
 };

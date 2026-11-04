@@ -1,5 +1,6 @@
-import { Alert, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 import Pressable from "../Touch";
+import Touch from "../Touch";
 import * as ImagePicker from "expo-image-picker";
 import DisplayView from "../DisplayView";
 import Icon from "../icons";
@@ -9,7 +10,8 @@ import { Btn, Card, FieldHead, PageHead, SectionHead, ToggleRow, tap } from "../
 
 const VW = 960, VH = 540;
 
-export default function Academy({ settings, setSettings, timer, now, width, wide }) {
+export default function Academy({ settings, setSettings, timer, now, width, wide, remote, setRemote, openDialog }) {
+  const notify = (title, message) => openDialog({ type: "confirm", title, message });
   const brand = settings.brand_color;
   const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
 
@@ -21,12 +23,12 @@ export default function Academy({ settings, setSettings, timer, now, width, wide
       if (res.canceled || !res.assets?.[0]?.base64) return;
       const a = res.assets[0];
       if (a.base64.length > 2_500_000) {
-        Alert.alert("Imagem muito grande", "Escolha uma imagem menor para o logo.");
+        notify("Imagem muito grande", "Escolha uma imagem menor para o logo.");
         return;
       }
       set({ logo: `data:${a.mimeType || "image/jpeg"};base64,${a.base64}` });
     } catch (e) {
-      Alert.alert("Não foi possível abrir as fotos", String(e?.message || e));
+      notify("Não foi possível abrir as fotos", String(e?.message || e));
     }
   };
 
@@ -57,14 +59,26 @@ export default function Academy({ settings, setSettings, timer, now, width, wide
         <SectionHead title="Identidade" sub="Nome, logo e cor de destaque." />
         <View style={{ gap: S[2] }}>
           <FieldHead label="Nome da academia" />
-          <TextInput
-            value={settings.gym_name}
-            onChangeText={(v) => set({ gym_name: v.slice(0, 40) })}
-            placeholder="Ex.: CT MAX"
-            placeholderTextColor={C.text3}
-            style={st.input}
-            maxLength={40}
-          />
+          {remote ? (
+            // no controle remoto, o campo vira um botão que abre o diálogo de edição
+            <Touch
+              accessibilityLabel="Editar nome da academia"
+              onPress={() => openDialog({ type: "text", title: "Nome da academia", initial: settings.gym_name, placeholder: "Ex.: CT MAX", onSave: (v) => set({ gym_name: v }) })}
+              style={[st.input, st.inputBtn]}
+            >
+              <Text style={st.inputText} numberOfLines={1}>{settings.gym_name || "CT MAX TIMER"}</Text>
+              <Text style={[st.edit, { color: brand }]}>Editar</Text>
+            </Touch>
+          ) : (
+            <TextInput
+              value={settings.gym_name}
+              onChangeText={(v) => set({ gym_name: v.slice(0, 40) })}
+              placeholder="Ex.: CT MAX"
+              placeholderTextColor={C.text3}
+              style={st.input}
+              maxLength={40}
+            />
+          )}
         </View>
         <View style={{ gap: S[2] }}>
           <FieldHead label="Logo" />
@@ -111,6 +125,7 @@ export default function Academy({ settings, setSettings, timer, now, width, wide
         <SectionHead title="Exibição" sub="O que aparece na tela de exibição." />
         <ToggleRow label="Próxima etapa" value={settings.show_next} onChange={(v) => set({ show_next: v })} brand={brand} />
         <ToggleRow label="Alto contraste" hint="Fundo branco para ambientes muito claros" value={settings.high_contrast} onChange={(v) => set({ high_contrast: v })} brand={brand} />
+        <ToggleRow label="Controle remoto (TV)" hint="Abas no topo, edição por diálogo e abre direto na exibição. Liga sozinho ao usar as setas." value={remote} onChange={setRemote} brand={brand} />
       </Card>
     </View>
   );
@@ -145,4 +160,7 @@ const st = StyleSheet.create({
   volBtn: { width: 52, paddingHorizontal: 0 },
   volTrack: { flex: 1, height: 8, borderRadius: 4, backgroundColor: C.navy700, overflow: "hidden" },
   volFill: { height: "100%" },
+  inputBtn: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: S[3] },
+  inputText: { flex: 1, fontFamily: F.medium, fontSize: 16, color: C.white },
+  edit: { fontFamily: F.wideX, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase" },
 });

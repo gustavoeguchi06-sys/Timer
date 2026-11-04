@@ -1,5 +1,6 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Pressable from "../Touch";
+import Touch from "../Touch";
 import * as Haptics from "expo-haptics";
 import { C, F, R, S } from "../theme";
 import { Btn, PageHead } from "../ui";
@@ -22,20 +23,26 @@ function PBtn({ label, onPress, bg, border, color = C.white, size = 24, h = 64, 
   );
 }
 
-export function Athlete({ side, data, onAdd, onName, big, height }) {
+export function Athlete({ side, data, onAdd, onName, onEditName, remote, big, height }) {
   const t = TEAM[side];
   const scoreSize = big ? Math.max(120, (height || 400) * 0.34) : 112;
   return (
     <View style={[st.athlete, { backgroundColor: t.tint }, big && { flex: 1 }]}>
       <View style={[st.head, { backgroundColor: t.c }]}>
         <Text style={st.corner}>{t.label}</Text>
-        <TextInput
-          value={data.name}
-          onChangeText={(v) => onName(v.slice(0, 30))}
-          style={[st.name, big && { fontSize: 30 }]}
-          selectionColor={C.white}
-          accessibilityLabel={`Nome do atleta ${t.label.toLowerCase()}`}
-        />
+        {remote ? (
+          <Touch accessibilityLabel={`Editar nome do atleta ${t.label.toLowerCase()}`} ringColor={C.white} onPress={onEditName} style={{ alignSelf: "flex-start", borderRadius: 6 }}>
+            <Text style={[st.name, big && { fontSize: 30 }]} numberOfLines={1}>{data.name}</Text>
+          </Touch>
+        ) : (
+          <TextInput
+            value={data.name}
+            onChangeText={(v) => onName(v.slice(0, 30))}
+            style={[st.name, big && { fontSize: 30 }]}
+            selectionColor={C.white}
+            accessibilityLabel={`Nome do atleta ${t.label.toLowerCase()}`}
+          />
+        )}
       </View>
       <Text allowFontScaling={false} style={[st.score, { fontSize: scoreSize, lineHeight: scoreSize * 1.05 }, big && { flex: 1, textAlignVertical: "center" }]}>
         {data.pts}
@@ -62,7 +69,7 @@ export function Athlete({ side, data, onAdd, onName, big, height }) {
   );
 }
 
-export default function Score({ score, onAdd, onName, onReset, onFullscreen, brand, wide }) {
+export default function Score({ score, onAdd, onName, onEditName, remote, onReset, onFullscreen, brand, wide }) {
   return (
     <View>
       <PageHead eyebrow="04 · Competição" title="Placar" brand={brand} />
@@ -73,7 +80,7 @@ export default function Score({ score, onAdd, onName, onReset, onFullscreen, bra
       <View style={{ flexDirection: wide ? "row" : "column", gap: S[3] }}>
         {["red", "blue"].map((side) => (
           <View key={side} style={wide ? { flex: 1 } : null}>
-            <Athlete side={side} data={score[side]} onAdd={(k, d) => onAdd(side, k, d)} onName={(n) => onName(side, n)} />
+            <Athlete side={side} remote={remote} data={score[side]} onAdd={(k, d) => onAdd(side, k, d)} onName={(n) => onName(side, n)} onEditName={() => onEditName(side)} />
           </View>
         ))}
       </View>
